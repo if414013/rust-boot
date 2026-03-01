@@ -469,17 +469,17 @@ max_connections = 20
 min_connections = 5
 "#;
 
-            let temp_file = "/tmp/test_config.toml";
-            std::fs::write(temp_file, toml_content).unwrap();
+            let temp_file = std::env::temp_dir().join("test_config.toml");
+            std::fs::write(&temp_file, toml_content).unwrap();
 
-            let config = RustBootConfig::from_file(temp_file).unwrap();
+            let config = RustBootConfig::from_file(temp_file.to_str().unwrap()).unwrap();
             assert_eq!(config.server.host, "0.0.0.0");
             assert_eq!(config.server.port, 8080);
             assert_eq!(config.database.url, "postgresql://localhost/testdb");
             assert_eq!(config.database.max_connections, 20);
             assert_eq!(config.database.min_connections, 5);
 
-            std::fs::remove_file(temp_file).unwrap();
+            std::fs::remove_file(&temp_file).unwrap();
         });
     }
 
@@ -501,15 +501,15 @@ min_connections = 5
 }
 "#;
 
-            let temp_file = "/tmp/test_config.json";
-            std::fs::write(temp_file, json_content).unwrap();
+            let temp_file = std::env::temp_dir().join("test_config.json");
+            std::fs::write(&temp_file, json_content).unwrap();
 
-            let config = RustBootConfig::from_file(temp_file).unwrap();
+            let config = RustBootConfig::from_file(temp_file.to_str().unwrap()).unwrap();
             assert_eq!(config.server.host, "192.168.1.1");
             assert_eq!(config.server.port, 3001);
             assert_eq!(config.database.url, "sqlite:./test.db");
 
-            std::fs::remove_file(temp_file).unwrap();
+            std::fs::remove_file(&temp_file).unwrap();
         });
     }
 
@@ -527,41 +527,43 @@ max_connections = 10
 min_connections = 1
 "#;
 
-            let temp_file = "/tmp/test_config_override.toml";
-            std::fs::write(temp_file, toml_content).unwrap();
+            let temp_file = std::env::temp_dir().join("test_config_override.toml");
+            std::fs::write(&temp_file, toml_content).unwrap();
 
             std::env::set_var("RUST_BOOT_SERVER_PORT", "9000");
 
-            let config = RustBootConfig::from_file(temp_file).unwrap();
+            let config = RustBootConfig::from_file(temp_file.to_str().unwrap()).unwrap();
             assert_eq!(config.server.host, "127.0.0.1");
             assert_eq!(config.server.port, 9000);
 
-            std::fs::remove_file(temp_file).unwrap();
+            std::fs::remove_file(&temp_file).unwrap();
         });
     }
 
     #[test]
     fn test_invalid_file_format() {
-        let result = RustBootConfig::from_file("/tmp/config.unknown");
+        let path = std::env::temp_dir().join("config.unknown");
+        let result = RustBootConfig::from_file(path.to_str().unwrap());
         assert!(result.is_err());
     }
 
     #[test]
     fn test_missing_file() {
-        let result = RustBootConfig::from_file("/tmp/nonexistent_config_12345.toml");
+        let path = std::env::temp_dir().join("nonexistent_config_12345.toml");
+        let result = RustBootConfig::from_file(path.to_str().unwrap());
         assert!(result.is_err());
     }
 
     #[test]
     fn test_invalid_toml_syntax() {
         let bad_toml = "invalid [toml content";
-        let temp_file = "/tmp/bad_config.toml";
-        std::fs::write(temp_file, bad_toml).unwrap();
+        let temp_file = std::env::temp_dir().join("bad_config.toml");
+        std::fs::write(&temp_file, bad_toml).unwrap();
 
-        let result = RustBootConfig::from_file(temp_file);
+        let result = RustBootConfig::from_file(temp_file.to_str().unwrap());
         assert!(result.is_err());
 
-        std::fs::remove_file(temp_file).unwrap();
+        std::fs::remove_file(&temp_file).unwrap();
     }
 
     #[test]
