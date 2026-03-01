@@ -27,12 +27,14 @@ jobs:
       - name: Install mdBook
         run: |
           mkdir -p $HOME/.local/bin
-          curl -sSL https://github.com/rust-lang/mdBook/releases/latest/download/mdbook-v0.4.40-x86_64-unknown-linux-gnu.tar.gz | tar -xz -C $HOME/.local/bin
+          MDBOOK_URL=$(curl -sSL https://api.github.com/repos/rust-lang/mdBook/releases/latest | jq -r '.assets[] | select(.name | test("x86_64-unknown-linux-gnu.tar.gz$")) | .browser_download_url')
+          curl -sSL "$MDBOOK_URL" | tar -xz -C $HOME/.local/bin
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install mdbook-mermaid
         run: |
-          curl -sSL https://github.com/badboy/mdbook-mermaid/releases/latest/download/mdbook-mermaid-v0.14.0-x86_64-unknown-linux-gnu.tar.gz | tar -xz -C $HOME/.local/bin
+          MERMAID_URL=$(curl -sSL https://api.github.com/repos/badboy/mdbook-mermaid/releases/latest | jq -r '.assets[] | select(.name | test("x86_64-unknown-linux-gnu.tar.gz$")) | .browser_download_url')
+          curl -sSL "$MERMAID_URL" | tar -xz -C $HOME/.local/bin
 
       - name: Build documentation
         working-directory: docs
