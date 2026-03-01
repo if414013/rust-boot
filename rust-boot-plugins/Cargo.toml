@@ -1,0 +1,32 @@
+[package]
+name = "rust-boot-plugins"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Built-in plugins for caching, monitoring, authentication, and event sourcing"
+
+[dependencies]
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json.workspace = true
+thiserror.workspace = true
+async-trait.workspace = true
+tracing.workspace = true
+moka.workspace = true
+redis.workspace = true
+metrics.workspace = true
+metrics-exporter-prometheus.workspace = true
+jsonwebtoken.workspace = true
+regex.workspace = true
+uuid.workspace = true
+rust-boot-core = { path = "../rust-boot-core" }
+
+[lints]
+workspace = true
