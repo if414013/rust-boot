@@ -1,0 +1,242 @@
+/* ============================================================
+   rust-boot Documentation — Custom Theme
+   ============================================================ */
+
+/* --- Root variables ---------------------------------------- */
+:root {
+  --sidebar-bg: #1b2838;
+  --sidebar-fg: #c5cdd8;
+  --sidebar-active: #e8a838;
+  --sidebar-hover-bg: #253347;
+  --content-max-width: 860px;
+  --code-bg: #f6f8fa;
+  --code-border: #e1e4e8;
+  --accent: #4a9eff;
+  --heading-color: #1b2838;
+  --link-color: #4a9eff;
+}
+
+/* --- Sidebar ----------------------------------------------- */
+.sidebar {
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-fg);
+  scrollbar-color: #354a64 var(--sidebar-bg);
+}
+
+.sidebar .sidebar-scrollbox {
+  padding: 16px 14px;
+}
+
+.sidebar a {
+  color: var(--sidebar-fg);
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  display: block;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.sidebar a:hover {
+  background-color: var(--sidebar-hover-bg);
+  color: #ffffff;
+}
+
+.sidebar a.active {
+  color: var(--sidebar-active);
+  font-weight: 600;
+  background-color: rgba(232, 168, 56, 0.08);
+}
+
+.sidebar .chapter-item {
+  margin: 2px 0;
+}
+
+/* --- Content area ------------------------------------------ */
+.content {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 24px 40px 60px;
+  line-height: 1.7;
+}
+
+/* --- Headings ---------------------------------------------- */
+.content h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--heading-color);
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 8px;
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+.content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--heading-color);
+  margin-top: 40px;
+  margin-bottom: 16px;
+}
+
+.content h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--heading-color);
+  margin-top: 32px;
+  margin-bottom: 12px;
+}
+
+/* --- Code blocks ------------------------------------------- */
+pre {
+  background-color: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 6px;
+  padding: 16px;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+code {
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", "Source Code Pro", monospace;
+  font-size: 0.875em;
+}
+
+:not(pre) > code {
+  background-color: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 3px;
+  padding: 2px 6px;
+}
+
+/* --- Links ------------------------------------------------- */
+.content a {
+  color: var(--link-color);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease;
+}
+
+.content a:hover {
+  border-bottom-color: var(--link-color);
+}
+
+/* --- Tables ------------------------------------------------ */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+th {
+  background-color: #f0f3f6;
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--code-border);
+}
+
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--code-border);
+}
+
+tr:hover td {
+  background-color: #f9fafb;
+}
+
+/* --- Blockquotes / callouts -------------------------------- */
+blockquote {
+  border-left: 4px solid var(--accent);
+  background-color: #f0f6ff;
+  margin: 20px 0;
+  padding: 12px 20px;
+  border-radius: 0 6px 6px 0;
+  color: #2c3e50;
+}
+
+/* --- Feature grid (used on introduction page) -------------- */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.feature-card {
+  border: 1px solid var(--code-border);
+  border-radius: 8px;
+  padding: 20px;
+  transition: box-shadow 0.2s ease;
+}
+
+.feature-card:hover {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Responsive -------------------------------------------- */
+@media (max-width: 768px) {
+  .content {
+    padding: 16px 18px 40px;
+  }
+
+  .content h1 {
+    font-size: 1.6rem;
+  }
+
+  .content h2 {
+    font-size: 1.3rem;
+  }
+
+  pre {
+    font-size: 0.8rem;
+    padding: 12px;
+  }
+}
+
+/* --- Dark theme overrides ---------------------------------- */
+.navy pre,
+.coal pre,
+.ayu pre {
+  background-color: #1e2a3a;
+  border-color: #2d3f54;
+}
+
+.navy :not(pre) > code,
+.coal :not(pre) > code,
+.ayu :not(pre) > code {
+  background-color: #1e2a3a;
+  border-color: #2d3f54;
+  color: #c5cdd8;
+}
+
+.navy blockquote,
+.coal blockquote,
+.ayu blockquote {
+  background-color: #1a2636;
+  color: #c5cdd8;
+}
+
+.navy th,
+.coal th,
+.ayu th {
+  background-color: #1e2a3a;
+}
+
+.navy tr:hover td,
+.coal tr:hover td,
+.ayu tr:hover td {
+  background-color: #1a2636;
+}
+
+/* --- Smooth transitions ------------------------------------ */
+* {
+  transition-property: background-color, color, border-color, box-shadow;
+  transition-duration: 0.15s;
+  transition-timing-function: ease;
+}
+
+/* Exclude animations from code/pre to avoid flicker */
+pre *, code * {
+  transition: none;
+}

@@ -1,0 +1,19 @@
+[book]
+title = "rust-boot Documentation"
+description = "A batteries-included CRUD API framework for Rust, inspired by Spring Boot"
+authors = ["rust-boot contributors"]
+language = "en"
+src = "src"
+
+[build]
+build-dir = "book"
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+
+[output.html]
+default-theme = "navy"
+preferred-dark-theme = "navy"
+additional-css = ["theme/custom.css"]
+git-repository-url = "https://github.com/yourusername/rust-boot"
+edit-url-template = "https://github.com/yourusername/rust-boot/edit/main/docs/{path}"
