@@ -118,6 +118,7 @@ impl<E: DomainEvent> EventEnvelope<E> {
 }
 
 /// Generic CRUD events for entity lifecycle tracking.
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum CrudEvent<T: Clone + Serialize> {
     /// Entity was created.

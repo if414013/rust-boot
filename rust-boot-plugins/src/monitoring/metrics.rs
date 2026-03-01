@@ -137,12 +137,14 @@ impl MetricsRecorder {
 }
 
 /// Timer for measuring HTTP request duration.
+#[allow(dead_code)]
 pub struct RequestTimer {
     start: Instant,
     method: String,
     path: String,
 }
 
+#[allow(dead_code)]
 impl RequestTimer {
     /// Creates a new request timer for the given method and path.
     pub fn new(method: impl Into<String>, path: impl Into<String>) -> Self {

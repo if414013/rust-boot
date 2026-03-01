@@ -1,7 +1,5 @@
 //! Integration tests for the rust-boot facade crate verifying cross-crate functionality.
 
-use std::time::Duration;
-
 mod test_prelude_imports {
     use rust_boot::prelude::*;
     use std::time::Duration;
@@ -53,10 +51,12 @@ mod test_prelude_imports {
         use async_trait::async_trait;
 
         #[async_trait]
+        #[allow(dead_code)]
         trait TestTrait {
             async fn do_something(&self);
         }
 
+        #[allow(dead_code)]
         struct TestImpl;
 
         #[async_trait]
@@ -362,7 +362,7 @@ mod test_crud_router_builder {
 
     #[derive(Clone)]
     struct AppState {
-        name: String,
+        _name: String,
     }
 
     async fn list_handler(State(_state): State<AppState>) -> &'static str {
@@ -908,6 +908,7 @@ mod test_event_sourcing {
     }
 
     #[derive(Debug, Clone, Serialize, Deserialize)]
+    #[allow(dead_code)]
     struct UserUpdated {
         user_id: String,
         new_email: String,

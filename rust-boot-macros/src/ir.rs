@@ -12,6 +12,7 @@ pub enum ValidationRule {
     Custom(String),
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct FieldIr {
     pub name: Ident,
@@ -33,6 +34,7 @@ pub struct CrudModelIr {
     pub fields: Vec<FieldIr>,
 }
 
+#[allow(dead_code)]
 impl CrudModelIr {
     pub fn primary_key_field(&self) -> Option<&FieldIr> {
         self.fields.iter().find(|f| f.is_primary_key)

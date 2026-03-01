@@ -16,6 +16,7 @@ pub struct GenerateCommand {
     pub name: String,
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct GeneratedModel {
     pub model_name: String,

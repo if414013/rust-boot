@@ -15,6 +15,7 @@ pub struct NewCommand {
     pub template: String,
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct GeneratedProject {
     pub project_name: String,
