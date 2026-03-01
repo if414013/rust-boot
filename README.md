@@ -69,6 +69,71 @@ The framework consists of several specialized crates:
 - **rust-boot-macros**: Procedural macros for code generation (DTOs, entities, and CRUD implementations).
 - **rust-boot-cli**: A command-line interface for scaffolding new projects and generating code.
 
+### Crate Dependency Graph
+
+```mermaid
+graph TD
+    A[rust-boot<br><i>facade crate</i>] --> B[rust-boot-core<br><i>plugin system · config · error</i>]
+    A --> C[rust-boot-axum<br><i>CRUD routers · handlers</i>]
+    A --> D[rust-boot-plugins<br><i>auth · cache · monitoring · events</i>]
+
+    C --> B
+    D --> B
+
+    E[rust-boot-macros<br><i>proc macros · codegen</i>]
+    F[rust-boot-cli<br><i>scaffolding · generation</i>]
+
+    style A fill:#e8a838,color:#000
+    style B fill:#4a9eff,color:#000
+    style C fill:#50c878,color:#000
+    style D fill:#50c878,color:#000
+    style E fill:#c084fc,color:#000
+    style F fill:#c084fc,color:#000
+```
+
+### Plugin Lifecycle
+
+Plugins follow a state machine managed by the `PluginRegistry`, which handles dependency resolution via topological sorting.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Adding : register()
+    Adding --> Ready : build() → ready()
+    Ready --> Finished : finish()
+    Finished --> Cleaned : cleanup()
+    Cleaned --> [*]
+
+    note right of Adding
+        Plugin registers state
+        into shared PluginContext
+    end note
+
+    note right of Ready
+        Plugin is initialized
+        and serving requests
+    end note
+```
+
+### Request Flow
+
+```mermaid
+flowchart LR
+    Client([Client]) --> Router
+
+    subgraph rust-boot
+        Router[CrudRouter<br>Axum routes] --> Auth[AuthPlugin<br>JWT + RBAC]
+        Auth --> Handler[CrudHandlers<br>list · get · create<br>update · delete]
+        Handler --> Repo[CrudRepository<br>trait impl]
+        Handler --> Cache[CachingPlugin<br>Moka · Redis]
+    end
+
+    Repo --> DB[(Database)]
+    Cache --> Redis[(Redis)]
+
+    Monitor[MonitoringPlugin<br>Prometheus · Health] -.-> Handler
+    Events[EventSourcingPlugin<br>Domain Events] -.-> Handler
+```
+
 ## Examples
 
 Check out the [examples/](rust-boot/examples/) directory for complete usage demonstrations:
