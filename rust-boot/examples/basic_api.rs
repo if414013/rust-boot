@@ -3,7 +3,7 @@
 //! This example shows how to build a simple CRUD API using the rust-boot framework.
 //! It demonstrates:
 //! - Plugin setup (caching, authentication, monitoring)
-//! - Router configuration with CrudRouterBuilder
+//! - Router configuration with `CrudRouterBuilder`
 //! - JWT token generation and verification
 //! - Basic Axum application setup
 //!
@@ -138,7 +138,9 @@ async fn update_user(
     let user = User {
         id,
         name: dto.name.unwrap_or_else(|| "Updated User".to_string()),
-        email: dto.email.unwrap_or_else(|| "updated@example.com".to_string()),
+        email: dto
+            .email
+            .unwrap_or_else(|| "updated@example.com".to_string()),
         active: dto.active.unwrap_or(true),
     };
 
@@ -176,11 +178,17 @@ fn demonstrate_jwt_auth(jwt_manager: &JwtManager) -> RustBootResult<()> {
 
     // Generate access token
     let access_token = jwt_manager.create_access_token(claims.clone())?;
-    println!("Access Token (first 50 chars): {}...", &access_token[..50.min(access_token.len())]);
+    println!(
+        "Access Token (first 50 chars): {}...",
+        &access_token[..50.min(access_token.len())]
+    );
 
     // Generate refresh token
     let refresh_token = jwt_manager.create_refresh_token(claims)?;
-    println!("Refresh Token (first 50 chars): {}...", &refresh_token[..50.min(refresh_token.len())]);
+    println!(
+        "Refresh Token (first 50 chars): {}...",
+        &refresh_token[..50.min(refresh_token.len())]
+    );
 
     // Verify the access token
     let verified_claims = jwt_manager.verify_access_token(&access_token)?;
@@ -188,14 +196,26 @@ fn demonstrate_jwt_auth(jwt_manager: &JwtManager) -> RustBootResult<()> {
     println!("  Subject: {}", verified_claims.sub);
     println!("  Email: {:?}", verified_claims.email);
     println!("  Name: {:?}", verified_claims.name);
-    println!("  Has admin role: {}", verified_claims.has_role(&Role::admin()));
-    println!("  Has user role: {}", verified_claims.has_role(&Role::user()));
+    println!(
+        "  Has admin role: {}",
+        verified_claims.has_role(&Role::admin())
+    );
+    println!(
+        "  Has user role: {}",
+        verified_claims.has_role(&Role::user())
+    );
 
     // Demonstrate token refresh
     let (new_access, new_refresh) = jwt_manager.refresh_tokens(&refresh_token)?;
     println!("\nTokens refreshed successfully!");
-    println!("New Access Token (first 50 chars): {}...", &new_access[..50.min(new_access.len())]);
-    println!("New Refresh Token (first 50 chars): {}...", &new_refresh[..50.min(new_refresh.len())]);
+    println!(
+        "New Access Token (first 50 chars): {}...",
+        &new_access[..50.min(new_access.len())]
+    );
+    println!(
+        "New Refresh Token (first 50 chars): {}...",
+        &new_refresh[..50.min(new_refresh.len())]
+    );
 
     Ok(())
 }
@@ -204,7 +224,7 @@ fn demonstrate_jwt_auth(jwt_manager: &JwtManager) -> RustBootResult<()> {
 // STEP 5: Plugin setup and initialization
 // ============================================================================
 
-/// Sets up and initializes all plugins using the PluginRegistry.
+/// Sets up and initializes all plugins using the `PluginRegistry`.
 ///
 /// This demonstrates:
 /// - Creating plugin configurations
@@ -219,30 +239,36 @@ async fn setup_plugins() -> RustBootResult<(Arc<JwtManager>, Arc<MokaBackend>)> 
     // Configure and register the caching plugin
     // The CachingPlugin uses Moka (in-memory cache) by default
     let cache_config = CacheConfig::new("api-cache")
-        .with_ttl(Duration::from_secs(300))  // 5 minutes TTL
-        .with_max_capacity(10_000);          // Max 10k entries
+        .with_ttl(Duration::from_secs(300)) // 5 minutes TTL
+        .with_max_capacity(10_000); // Max 10k entries
 
     let caching_plugin = CachingPlugin::new(cache_config.clone());
-    registry.register(caching_plugin).expect("Failed to register caching plugin");
+    registry
+        .register(caching_plugin)
+        .expect("Failed to register caching plugin");
     println!("✓ Registered CachingPlugin");
 
     // Configure and register the monitoring plugin
     // This provides Prometheus metrics and health checks
     let metrics_config = MetricsConfig::default();
     let monitoring_plugin = MonitoringPlugin::new(metrics_config);
-    registry.register(monitoring_plugin).expect("Failed to register monitoring plugin");
+    registry
+        .register(monitoring_plugin)
+        .expect("Failed to register monitoring plugin");
     println!("✓ Registered MonitoringPlugin");
 
     // Configure and register the authentication plugin
     // IMPORTANT: In production, use a secure secret from environment variables!
     let jwt_config = JwtConfig::new("your-super-secret-key-change-in-production")
-        .with_access_token_ttl(Duration::from_secs(15 * 60))    // 15 minutes
-        .with_refresh_token_ttl(Duration::from_secs(7 * 24 * 60 * 60))  // 7 days
+        .with_access_token_ttl(Duration::from_secs(15 * 60)) // 15 minutes
+        .with_refresh_token_ttl(Duration::from_secs(7 * 24 * 60 * 60)) // 7 days
         .with_issuer("rust-boot-example")
         .with_audience("rust-boot-api");
 
     let auth_plugin = AuthPlugin::new(jwt_config.clone());
-    registry.register(auth_plugin).expect("Failed to register auth plugin");
+    registry
+        .register(auth_plugin)
+        .expect("Failed to register auth plugin");
     println!("✓ Registered AuthPlugin");
 
     // Initialize all plugins in dependency order
@@ -260,7 +286,7 @@ async fn setup_plugins() -> RustBootResult<(Arc<JwtManager>, Arc<MokaBackend>)> 
 // STEP 6: Router configuration
 // ============================================================================
 
-/// Creates the API router using CrudRouterBuilder.
+/// Creates the API router using `CrudRouterBuilder`.
 ///
 /// This demonstrates:
 /// - Creating router configuration
@@ -268,22 +294,19 @@ async fn setup_plugins() -> RustBootResult<(Arc<JwtManager>, Arc<MokaBackend>)> 
 /// - Building the final router
 fn create_router(state: AppState) -> axum::Router {
     // Configure the CRUD router for the /api/users endpoint
-    let router_config = CrudRouterConfig::new("/api/users")
-        .with_soft_delete();  // Enable soft delete support
+    let router_config = CrudRouterConfig::new("/api/users").with_soft_delete(); // Enable soft delete support
 
     // Build the users router with all CRUD operations
     let users_router = CrudRouterBuilder::<AppState>::new(router_config)
-        .list(list_users)      // GET /api/users
-        .get(get_user)         // GET /api/users/:id
-        .create(create_user)   // POST /api/users
-        .update(update_user)   // PUT /api/users/:id
-        .delete(delete_user)   // DELETE /api/users/:id
+        .list(list_users) // GET /api/users
+        .get(get_user) // GET /api/users/:id
+        .create(create_user) // POST /api/users
+        .update(update_user) // PUT /api/users/:id
+        .delete(delete_user) // DELETE /api/users/:id
         .build();
 
     // Create the main application router
-    axum::Router::new()
-        .merge(users_router)
-        .with_state(state)
+    axum::Router::new().merge(users_router).with_state(state)
 }
 
 // ============================================================================
@@ -307,18 +330,23 @@ async fn main() -> RustBootResult<()> {
 
     // Step 3: Demonstrate caching
     println!("\n=== Caching Demo ===\n");
-    
+
     // Store a value in cache
     let user = User::new("Cached User", "cached@example.com");
     let cache_key = format!("user:{}", user.id);
     let user_bytes = serde_json::to_vec(&user).expect("Failed to serialize user");
-    cache.set(&cache_key, user_bytes, Some(Duration::from_secs(60))).await?;
-    println!("✓ Stored user in cache with key: {}", cache_key);
+    cache
+        .set(&cache_key, user_bytes, Some(Duration::from_secs(60)))
+        .await?;
+    println!("✓ Stored user in cache with key: {cache_key}");
 
     // Retrieve from cache
     if let Some(bytes) = cache.get(&cache_key).await? {
         let cached_user: User = serde_json::from_slice(&bytes).expect("Failed to deserialize user");
-        println!("✓ Retrieved from cache: {} <{}>", cached_user.name, cached_user.email);
+        println!(
+            "✓ Retrieved from cache: {} <{}>",
+            cached_user.name, cached_user.email
+        );
     }
 
     // Step 4: Create the router

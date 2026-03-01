@@ -1,4 +1,4 @@
-//! DTO code generation for CreateDTO, UpdateDTO, and ResponseDTO.
+//! DTO code generation for `CreateDTO`, `UpdateDTO`, and `ResponseDTO`.
 
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
@@ -287,7 +287,10 @@ mod tests {
         let attrs = generate_validation_attrs(&validations);
 
         assert_eq!(attrs.len(), 2);
-        let code = attrs.iter().map(|a| a.to_string()).collect::<String>();
+        let code = attrs
+            .iter()
+            .map(std::string::ToString::to_string)
+            .collect::<String>();
         assert!(code.contains("min = 5"));
         assert!(code.contains("max = 100"));
     }

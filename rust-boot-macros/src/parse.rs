@@ -1,4 +1,4 @@
-//! Parsing logic for CrudModel attributes.
+//! Parsing logic for `CrudModel` attributes.
 
 use darling::{FromDeriveInput, FromField};
 use syn::{DeriveInput, Error, Ident};
@@ -47,10 +47,7 @@ struct CrudFieldAttrs {
 }
 
 pub fn parse_crud_model(input: &DeriveInput) -> Result<CrudModelIr, Error> {
-    let attrs = match CrudModelAttrs::from_derive_input(input) {
-        Ok(v) => v,
-        Err(e) => return Err(e.into()),
-    };
+    let attrs = CrudModelAttrs::from_derive_input(input)?;
 
     let table_name = attrs
         .table_name
@@ -60,7 +57,7 @@ pub fn parse_crud_model(input: &DeriveInput) -> Result<CrudModelIr, Error> {
         darling::ast::Data::Struct(fields) => fields
             .fields
             .into_iter()
-            .map(|f| parse_field(f))
+            .map(parse_field)
             .collect::<Result<Vec<_>, _>>()?,
         _ => {
             return Err(Error::new_spanned(
@@ -107,7 +104,7 @@ fn parse_validation(validation: &Option<String>) -> Result<Vec<ValidationRule>, 
     };
 
     let mut rules = Vec::new();
-    for rule in val.split(',').map(|s| s.trim()).filter(|s| !s.is_empty()) {
+    for rule in val.split(',').map(str::trim).filter(|s| !s.is_empty()) {
         let parsed = match rule {
             "email" => ValidationRule::Email,
             "url" => ValidationRule::Url,

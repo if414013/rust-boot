@@ -109,7 +109,7 @@ impl<E: DomainEvent> EventEnvelope<E> {
     }
 
     /// Creates an event envelope with pre-built metadata.
-    pub fn with_metadata(metadata: EventMetadata, event: E) -> Self {
+    pub const fn with_metadata(metadata: EventMetadata, event: E) -> Self {
         Self {
             metadata,
             payload: event,
@@ -148,10 +148,10 @@ pub enum CrudEvent<T: Clone + Serialize> {
 impl<T: Clone + Serialize + DeserializeOwned + Send + Sync> DomainEvent for CrudEvent<T> {
     fn event_type(&self) -> &'static str {
         match self {
-            CrudEvent::Created { .. } => "Created",
-            CrudEvent::Updated { .. } => "Updated",
-            CrudEvent::Deleted { .. } => "Deleted",
-            CrudEvent::Restored { .. } => "Restored",
+            Self::Created { .. } => "Created",
+            Self::Updated { .. } => "Updated",
+            Self::Deleted { .. } => "Deleted",
+            Self::Restored { .. } => "Restored",
         }
     }
 
@@ -200,9 +200,7 @@ mod tests {
             id: "1".to_string(),
             name: "Test".to_string(),
         };
-        let event: CrudEvent<TestEntity> = CrudEvent::Created {
-            entity: entity.clone(),
-        };
+        let event: CrudEvent<TestEntity> = CrudEvent::Created { entity };
         let envelope = EventEnvelope::new("agg-123", 1, event);
 
         assert_eq!(envelope.metadata.aggregate_id, "agg-123");

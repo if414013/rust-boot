@@ -47,37 +47,37 @@ impl CrudRouterConfig {
     }
 
     /// Enables soft delete with restore functionality.
-    pub fn with_soft_delete(mut self) -> Self {
+    pub const fn with_soft_delete(mut self) -> Self {
         self.enable_soft_delete = true;
         self
     }
 
     /// Disables the list endpoint.
-    pub fn disable_list(mut self) -> Self {
+    pub const fn disable_list(mut self) -> Self {
         self.enable_list = false;
         self
     }
 
     /// Disables the get-by-id endpoint.
-    pub fn disable_get(mut self) -> Self {
+    pub const fn disable_get(mut self) -> Self {
         self.enable_get = false;
         self
     }
 
     /// Disables the create endpoint.
-    pub fn disable_create(mut self) -> Self {
+    pub const fn disable_create(mut self) -> Self {
         self.enable_create = false;
         self
     }
 
     /// Disables the update endpoint.
-    pub fn disable_update(mut self) -> Self {
+    pub const fn disable_update(mut self) -> Self {
         self.enable_update = false;
         self
     }
 
     /// Disables the delete endpoint.
-    pub fn disable_delete(mut self) -> Self {
+    pub const fn disable_delete(mut self) -> Self {
         self.enable_delete = false;
         self
     }
@@ -301,8 +301,6 @@ mod tests {
 
     #[test]
     fn test_crud_router_empty_base_path() {
-        let _router: Router<TestState> = crud_router::<TestState>("")
-            .list(list_handler)
-            .build();
+        let _router: Router<TestState> = crud_router::<TestState>("").list(list_handler).build();
     }
 }

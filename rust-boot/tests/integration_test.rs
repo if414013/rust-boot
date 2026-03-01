@@ -11,7 +11,7 @@ mod test_prelude_imports {
         let _config = RustBootConfig::default();
         let _meta = PluginMeta::new("test", "1.0.0");
         let _ctx = PluginContext::new();
-        let _state = PluginState::Adding;
+        let _ = PluginState::Adding;
     }
 
     #[test]
@@ -298,7 +298,10 @@ mod test_plugin_lifecycle {
             db_idx < cache_idx,
             "database should be initialized before cache"
         );
-        assert!(cache_idx < auth_idx, "cache should be initialized before auth");
+        assert!(
+            cache_idx < auth_idx,
+            "cache should be initialized before auth"
+        );
     }
 
     #[tokio::test]
@@ -342,11 +345,7 @@ mod test_plugin_lifecycle {
         #[async_trait]
         impl CrudPlugin for PluginWithMissingDep {
             fn meta(&self) -> PluginMeta {
-                PluginMeta::with_dependencies(
-                    "dependent",
-                    "1.0.0",
-                    vec!["nonexistent".to_string()],
-                )
+                PluginMeta::with_dependencies("dependent", "1.0.0", vec!["nonexistent".to_string()])
             }
         }
 
@@ -536,8 +535,7 @@ mod test_jwt_auth_flow {
 
     #[test]
     fn test_claims_role_checks() {
-        let claims = Claims::new("user-123", 0, 0)
-            .with_roles([Role::admin(), Role::user()]);
+        let claims = Claims::new("user-123", 0, 0).with_roles([Role::admin(), Role::user()]);
 
         assert!(claims.has_any_role(&[Role::admin()]));
         assert!(claims.has_any_role(&[Role::new("guest"), Role::user()]));
@@ -738,16 +736,20 @@ mod test_caching {
     async fn test_moka_backend_exists() {
         let cache = create_test_cache();
 
-        assert!(
-            !cache.exists("key").await.expect("Failed to check existence")
-        );
+        assert!(!cache
+            .exists("key")
+            .await
+            .expect("Failed to check existence"));
 
         cache
             .set("key", b"value".to_vec(), None)
             .await
             .expect("Failed to set value");
 
-        assert!(cache.exists("key").await.expect("Failed to check existence"));
+        assert!(cache
+            .exists("key")
+            .await
+            .expect("Failed to check existence"));
     }
 
     #[tokio::test]
@@ -791,18 +793,14 @@ mod test_caching {
 
         cache.clear().await.expect("Failed to clear cache");
 
-        assert!(
-            !cache
-                .exists("key1")
-                .await
-                .expect("Failed to check existence")
-        );
-        assert!(
-            !cache
-                .exists("key2")
-                .await
-                .expect("Failed to check existence")
-        );
+        assert!(!cache
+            .exists("key1")
+            .await
+            .expect("Failed to check existence"));
+        assert!(!cache
+            .exists("key2")
+            .await
+            .expect("Failed to check existence"));
     }
 
     #[tokio::test]
@@ -845,8 +843,8 @@ mod test_caching {
             .expect("Failed to set value");
 
         let retrieved = cache.get("user:1").await.expect("Failed to get value");
-        let deserialized: User =
-            serde_json::from_slice(&retrieved.expect("Value not found")).expect("Failed to deserialize");
+        let deserialized: User = serde_json::from_slice(&retrieved.expect("Value not found"))
+            .expect("Failed to deserialize");
 
         assert_eq!(deserialized, user);
     }
@@ -864,7 +862,10 @@ mod test_caching {
         let mut plugin = CachingPlugin::new(config);
         let mut ctx = PluginContext::new();
 
-        plugin.build(&mut ctx).await.expect("Failed to build plugin");
+        plugin
+            .build(&mut ctx)
+            .await
+            .expect("Failed to build plugin");
 
         assert!(plugin.backend().is_some());
         assert!(ctx.contains("cache_backend").await);
@@ -876,7 +877,10 @@ mod test_caching {
         let mut plugin = CachingPlugin::new(config);
         let mut ctx = PluginContext::new();
 
-        plugin.build(&mut ctx).await.expect("Failed to build plugin");
+        plugin
+            .build(&mut ctx)
+            .await
+            .expect("Failed to build plugin");
         plugin
             .cleanup(&mut ctx)
             .await
@@ -1148,8 +1152,7 @@ mod test_cross_crate_integration {
 
         registry.init_all().await.expect("init_all failed");
 
-        let backend: Option<Arc<dyn CacheBackend>> =
-            registry.context().get("cache_backend").await;
+        let backend: Option<Arc<dyn CacheBackend>> = registry.context().get("cache_backend").await;
         assert!(backend.is_some());
 
         let cache = backend.expect("Cache backend not found");
@@ -1173,9 +1176,8 @@ mod test_cross_crate_integration {
 
     #[test]
     fn test_auth_with_role_based_access() {
-        let jwt_manager = JwtManager::new(JwtConfig::new(
-            "integration-secret-key-long-enough-for-jwt",
-        ));
+        let jwt_manager =
+            JwtManager::new(JwtConfig::new("integration-secret-key-long-enough-for-jwt"));
 
         let admin_claims = Claims::new("admin-user", 0, 0)
             .with_role(Role::admin())
@@ -1232,7 +1234,11 @@ mod test_cross_crate_integration {
         #[async_trait]
         impl CrudPlugin for CacheWithDbPlugin {
             fn meta(&self) -> PluginMeta {
-                PluginMeta::with_dependencies("cache-with-db", "1.0.0", vec!["database".to_string()])
+                PluginMeta::with_dependencies(
+                    "cache-with-db",
+                    "1.0.0",
+                    vec!["database".to_string()],
+                )
             }
 
             async fn build(&mut self, ctx: &mut PluginContext) -> RustBootResult<()> {
@@ -1278,11 +1284,17 @@ mod test_cross_crate_integration {
 
         assert!(plugin.store().is_none());
 
-        plugin.build(&mut ctx).await.expect("Failed to build plugin");
+        plugin
+            .build(&mut ctx)
+            .await
+            .expect("Failed to build plugin");
 
         assert!(plugin.store().is_some());
 
-        plugin.cleanup(&mut ctx).await.expect("Failed to cleanup plugin");
+        plugin
+            .cleanup(&mut ctx)
+            .await
+            .expect("Failed to cleanup plugin");
 
         assert!(plugin.store().is_none());
     }

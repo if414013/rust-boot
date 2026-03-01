@@ -13,9 +13,9 @@ mod parse;
 /// Derives CRUD model implementations for a struct.
 ///
 /// This macro generates:
-/// - SeaORM entity with columns and relations
-/// - CreateDTO, UpdateDTO, and ResponseDTO structs
-/// - OpenAPI schema annotations via utoipa
+/// - `SeaORM` entity with columns and relations
+/// - `CreateDTO`, `UpdateDTO`, and `ResponseDTO` structs
+/// - `OpenAPI` schema annotations via utoipa
 ///
 /// # Attributes
 ///

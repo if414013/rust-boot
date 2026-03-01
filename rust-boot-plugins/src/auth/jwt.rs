@@ -33,13 +33,13 @@ impl JwtConfig {
     }
 
     /// Sets the access token TTL.
-    pub fn with_access_token_ttl(mut self, ttl: Duration) -> Self {
+    pub const fn with_access_token_ttl(mut self, ttl: Duration) -> Self {
         self.access_token_ttl = ttl;
         self
     }
 
     /// Sets the refresh token TTL.
-    pub fn with_refresh_token_ttl(mut self, ttl: Duration) -> Self {
+    pub const fn with_refresh_token_ttl(mut self, ttl: Duration) -> Self {
         self.refresh_token_ttl = ttl;
         self
     }
@@ -87,7 +87,7 @@ impl JwtManager {
         claims.exp = now.as_secs() + self.config.access_token_ttl.as_secs();
 
         encode(&Header::default(), &claims, &self.encoding_key)
-            .map_err(|e| RustBootError::Internal(format!("Failed to create token: {}", e)))
+            .map_err(|e| RustBootError::Internal(format!("Failed to create token: {e}")))
     }
 
     /// Creates a new refresh token from the given claims.
@@ -101,7 +101,7 @@ impl JwtManager {
         claims.refresh = Some(true);
 
         encode(&Header::default(), &claims, &self.encoding_key)
-            .map_err(|e| RustBootError::Internal(format!("Failed to create refresh token: {}", e)))
+            .map_err(|e| RustBootError::Internal(format!("Failed to create refresh token: {e}")))
     }
 
     /// Verifies a token and returns its claims.
@@ -117,7 +117,7 @@ impl JwtManager {
         }
 
         let token_data = decode::<Claims>(token, &self.decoding_key, &validation)
-            .map_err(|e| RustBootError::Auth(format!("Invalid token: {}", e)))?;
+            .map_err(|e| RustBootError::Auth(format!("Invalid token: {e}")))?;
 
         Ok(token_data.claims)
     }
@@ -173,7 +173,7 @@ impl JwtManager {
     }
 
     /// Returns the JWT configuration.
-    pub fn config(&self) -> &JwtConfig {
+    pub const fn config(&self) -> &JwtConfig {
         &self.config
     }
 }

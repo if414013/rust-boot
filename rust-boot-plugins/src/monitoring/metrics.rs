@@ -50,7 +50,7 @@ impl MetricsConfig {
     }
 
     /// Enables or disables process metrics collection.
-    pub fn with_process_metrics(mut self, enable: bool) -> Self {
+    pub const fn with_process_metrics(mut self, enable: bool) -> Self {
         self.enable_process_metrics = enable;
         self
     }
@@ -74,7 +74,7 @@ impl MetricsRecorder {
     }
 
     /// Installs the metrics recorder as the global recorder.
-    pub fn install(&self) -> Result<()> {
+    pub const fn install(&self) -> Result<()> {
         Ok(())
     }
 
@@ -130,7 +130,7 @@ impl MetricsRecorder {
 
     fn prefixed_name(&self, name: &str) -> String {
         match &self.config.prefix {
-            Some(prefix) => format!("{}_{}", prefix, name),
+            Some(prefix) => format!("{prefix}_{name}"),
             None => name.to_string(),
         }
     }

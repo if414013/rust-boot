@@ -55,15 +55,15 @@ pub enum RustBootError {
 impl Display for RustBootError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            RustBootError::Config(msg) => write!(f, "configuration error: {}", msg),
-            RustBootError::Database(msg) => write!(f, "database error: {}", msg),
-            RustBootError::Plugin(msg) => write!(f, "plugin error: {}", msg),
-            RustBootError::Validation(msg) => write!(f, "validation error: {}", msg),
-            RustBootError::Serialization(msg) => write!(f, "serialization error: {}", msg),
-            RustBootError::Http(status, msg) => write!(f, "HTTP {} error: {}", status, msg),
-            RustBootError::Cache(msg) => write!(f, "cache error: {}", msg),
-            RustBootError::Auth(msg) => write!(f, "authentication error: {}", msg),
-            RustBootError::Internal(msg) => write!(f, "internal error: {}", msg),
+            Self::Config(msg) => write!(f, "configuration error: {msg}"),
+            Self::Database(msg) => write!(f, "database error: {msg}"),
+            Self::Plugin(msg) => write!(f, "plugin error: {msg}"),
+            Self::Validation(msg) => write!(f, "validation error: {msg}"),
+            Self::Serialization(msg) => write!(f, "serialization error: {msg}"),
+            Self::Http(status, msg) => write!(f, "HTTP {status} error: {msg}"),
+            Self::Cache(msg) => write!(f, "cache error: {msg}"),
+            Self::Auth(msg) => write!(f, "authentication error: {msg}"),
+            Self::Internal(msg) => write!(f, "internal error: {msg}"),
         }
     }
 }
@@ -91,7 +91,7 @@ pub type Result<T> = std::result::Result<T, RustBootError>;
 /// Maps IO errors to database errors since they typically occur during database operations.
 impl From<std::io::Error> for RustBootError {
     fn from(err: std::io::Error) -> Self {
-        RustBootError::Database(format!("IO error: {}", err))
+        Self::Database(format!("IO error: {err}"))
     }
 }
 
@@ -100,7 +100,7 @@ impl From<std::io::Error> for RustBootError {
 /// Maps JSON serialization errors to `RustBootError::Serialization`.
 impl From<serde_json::Error> for RustBootError {
     fn from(err: serde_json::Error) -> Self {
-        RustBootError::Serialization(format!("JSON error: {}", err))
+        Self::Serialization(format!("JSON error: {err}"))
     }
 }
 
@@ -109,7 +109,7 @@ impl From<serde_json::Error> for RustBootError {
 /// Maps configuration crate errors to `RustBootError::Config`.
 impl From<config::ConfigError> for RustBootError {
     fn from(err: config::ConfigError) -> Self {
-        RustBootError::Config(format!("Config crate error: {}", err))
+        Self::Config(format!("Config crate error: {err}"))
     }
 }
 
@@ -257,7 +257,7 @@ mod tests {
     #[test]
     fn test_error_debug_display() {
         let err = RustBootError::Plugin("plugin load error".to_string());
-        let debug_str = format!("{:?}", err);
+        let debug_str = format!("{err:?}");
         assert!(debug_str.contains("Plugin"));
         assert!(debug_str.contains("plugin load error"));
     }

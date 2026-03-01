@@ -3,7 +3,7 @@
 //! This module provides layered configuration support with the following precedence:
 //! 1. Default values
 //! 2. Configuration file (TOML, YAML, JSON)
-//! 3. Environment variables (RUST_BOOT_* prefix)
+//! 3. Environment variables (`RUST_BOOT`_* prefix)
 //!
 //! # Examples
 //!
@@ -47,7 +47,7 @@ impl Default for ServerConfig {
 
 impl ServerConfig {
     /// Creates a new server configuration
-    pub fn new(host: String, port: u16) -> Self {
+    pub const fn new(host: String, port: u16) -> Self {
         Self { host, port }
     }
 }
@@ -75,7 +75,7 @@ impl Default for DatabaseConfig {
 
 impl DatabaseConfig {
     /// Creates a new database configuration
-    pub fn new(url: String, max_connections: u32, min_connections: u32) -> Self {
+    pub const fn new(url: String, max_connections: u32, min_connections: u32) -> Self {
         Self {
             url,
             max_connections,
@@ -85,7 +85,7 @@ impl DatabaseConfig {
 }
 
 /// Main application configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct RustBootConfig {
     /// Server configuration
     pub server: ServerConfig,
@@ -96,18 +96,8 @@ pub struct RustBootConfig {
     pub plugins: HashMap<String, serde_json::Value>,
 }
 
-impl Default for RustBootConfig {
-    fn default() -> Self {
-        Self {
-            server: ServerConfig::default(),
-            database: DatabaseConfig::default(),
-            plugins: HashMap::new(),
-        }
-    }
-}
-
 impl RustBootConfig {
-    /// Creates a new RustBootConfig builder
+    /// Creates a new `RustBootConfig` builder
     pub fn builder() -> RustBootConfigBuilder {
         RustBootConfigBuilder::default()
     }
@@ -115,7 +105,7 @@ impl RustBootConfig {
     /// Load configuration from a file with environment variable overrides
     ///
     /// Supports TOML, YAML, and JSON file formats based on file extension.
-    /// Environment variables with RUST_BOOT_ prefix override file values.
+    /// Environment variables with `RUST_BOOT`_ prefix override file values.
     ///
     /// # Errors
     ///
@@ -149,7 +139,7 @@ impl RustBootConfig {
     /// Load configuration from environment variables only
     ///
     /// Uses default values for any configuration not set via environment variables.
-    /// Environment variables must use the RUST_BOOT_ prefix.
+    /// Environment variables must use the `RUST_BOOT`_ prefix.
     pub fn from_env() -> Self {
         let mut config = Self::default();
         config.apply_env_overrides();
@@ -185,7 +175,7 @@ impl RustBootConfig {
     }
 }
 
-/// Builder for RustBootConfig
+/// Builder for `RustBootConfig`
 #[derive(Default)]
 pub struct RustBootConfigBuilder {
     server_host: Option<String>,
@@ -204,7 +194,7 @@ impl RustBootConfigBuilder {
     }
 
     /// Set the server port
-    pub fn server_port(mut self, port: u16) -> Self {
+    pub const fn server_port(mut self, port: u16) -> Self {
         self.server_port = Some(port);
         self
     }
@@ -216,13 +206,13 @@ impl RustBootConfigBuilder {
     }
 
     /// Set the maximum number of database connections
-    pub fn database_max_connections(mut self, max: u32) -> Self {
+    pub const fn database_max_connections(mut self, max: u32) -> Self {
         self.database_max_connections = Some(max);
         self
     }
 
     /// Set the minimum number of database connections
-    pub fn database_min_connections(mut self, min: u32) -> Self {
+    pub const fn database_min_connections(mut self, min: u32) -> Self {
         self.database_min_connections = Some(min);
         self
     }
@@ -273,8 +263,8 @@ pub enum ConfigError {
 impl std::fmt::Display for ConfigError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::FileReadError(e) => write!(f, "Failed to read config file: {}", e),
-            Self::ParseError(e) => write!(f, "Failed to parse config file: {}", e),
+            Self::FileReadError(e) => write!(f, "Failed to read config file: {e}"),
+            Self::ParseError(e) => write!(f, "Failed to parse config file: {e}"),
             Self::InvalidFileFormat => {
                 write!(f, "Invalid file format. Supported: .toml, .yaml, .json")
             }

@@ -88,7 +88,7 @@ impl HealthStatus {
     }
 
     /// Merges another health status into this one.
-    pub fn merge(mut self, other: HealthStatus) -> Self {
+    pub fn merge(mut self, other: Self) -> Self {
         for (name, result) in other.checks {
             self.checks.insert(name, result);
         }
@@ -120,7 +120,7 @@ impl HealthStatus {
 
 impl CheckResult {
     /// Creates a healthy check result.
-    pub fn healthy() -> Self {
+    pub const fn healthy() -> Self {
         Self {
             status: HealthState::Healthy,
             message: None,
@@ -129,7 +129,7 @@ impl CheckResult {
     }
 
     /// Creates a healthy check result with latency measurement.
-    pub fn healthy_with_latency(latency_ms: u64) -> Self {
+    pub const fn healthy_with_latency(latency_ms: u64) -> Self {
         Self {
             status: HealthState::Healthy,
             message: None,

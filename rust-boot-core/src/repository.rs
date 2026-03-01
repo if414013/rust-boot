@@ -346,7 +346,7 @@ mod tests {
         for i in 0..5 {
             repo.insert(&TestEntity {
                 id: 0,
-                name: format!("Entity {}", i),
+                name: format!("Entity {i}"),
             })
             .await
             .unwrap();

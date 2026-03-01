@@ -23,11 +23,11 @@ pub struct PaginationQuery {
     pub include_deleted: bool,
 }
 
-fn default_page() -> u64 {
+const fn default_page() -> u64 {
     1
 }
 
-fn default_per_page() -> u64 {
+const fn default_per_page() -> u64 {
     20
 }
 
@@ -58,9 +58,9 @@ pub struct PaginatedResponse<T> {
 
 impl<T> PaginatedResponse<T> {
     /// Creates a new paginated response.
-    pub fn new(data: Vec<T>, page: u64, per_page: u64, total: u64) -> Self {
+    pub const fn new(data: Vec<T>, page: u64, per_page: u64, total: u64) -> Self {
         let total_pages = if per_page > 0 {
-            (total + per_page - 1) / per_page
+            total.div_ceil(per_page)
         } else {
             0
         };
@@ -83,7 +83,7 @@ pub struct ApiResponse<T> {
 
 impl<T> ApiResponse<T> {
     /// Creates a new API response.
-    pub fn new(data: T) -> Self {
+    pub const fn new(data: T) -> Self {
         Self { data }
     }
 }
@@ -91,7 +91,7 @@ impl<T> ApiResponse<T> {
 /// Structured error response for API endpoints.
 #[derive(Debug, Clone, Serialize)]
 pub struct ApiError {
-    /// Error code (e.g., "not_found", "bad_request").
+    /// Error code (e.g., "`not_found`", "`bad_request`").
     pub error: String,
     /// Human-readable error message.
     pub message: String,
@@ -118,7 +118,7 @@ impl ApiError {
 
     /// Creates a not found error for the given resource.
     pub fn not_found(resource: &str) -> Self {
-        Self::new("not_found", format!("{} not found", resource))
+        Self::new("not_found", format!("{resource} not found"))
     }
 
     /// Creates a bad request error.
@@ -163,22 +163,22 @@ pub type ApiResult<T> = Result<Json<ApiResponse<T>>, ApiError>;
 pub type PaginatedResult<T> = Result<Json<PaginatedResponse<T>>, ApiError>;
 
 /// Returns a successful API response with data.
-pub fn ok<T: Serialize>(data: T) -> ApiResult<T> {
+pub const fn ok<T: Serialize>(data: T) -> ApiResult<T> {
     Ok(Json(ApiResponse::new(data)))
 }
 
 /// Returns a 201 Created response with data.
-pub fn created<T: Serialize>(data: T) -> (StatusCode, Json<ApiResponse<T>>) {
+pub const fn created<T: Serialize>(data: T) -> (StatusCode, Json<ApiResponse<T>>) {
     (StatusCode::CREATED, Json(ApiResponse::new(data)))
 }
 
 /// Returns a 204 No Content response.
-pub fn no_content() -> StatusCode {
+pub const fn no_content() -> StatusCode {
     StatusCode::NO_CONTENT
 }
 
 /// Returns a successful paginated response.
-pub fn paginated<T: Serialize>(
+pub const fn paginated<T: Serialize>(
     data: Vec<T>,
     page: u64,
     per_page: u64,
@@ -198,10 +198,7 @@ where
     UpdateDto: DeserializeOwned + Send + Sync + 'static,
 {
     /// Lists entities with pagination.
-    async fn list(
-        state: State<S>,
-        query: Query<PaginationQuery>,
-    ) -> PaginatedResult<Entity>;
+    async fn list(state: State<S>, query: Query<PaginationQuery>) -> PaginatedResult<Entity>;
 
     /// Gets a single entity by ID.
     async fn get(state: State<S>, id: Path<Id>) -> ApiResult<Entity>;
@@ -213,11 +210,7 @@ where
     ) -> (StatusCode, Json<ApiResponse<Entity>>);
 
     /// Updates an existing entity.
-    async fn update(
-        state: State<S>,
-        id: Path<Id>,
-        payload: Json<UpdateDto>,
-    ) -> ApiResult<Entity>;
+    async fn update(state: State<S>, id: Path<Id>, payload: Json<UpdateDto>) -> ApiResult<Entity>;
 
     /// Deletes an entity.
     async fn delete(state: State<S>, id: Path<Id>) -> StatusCode;

@@ -62,27 +62,27 @@ pub enum PluginState {
 impl fmt::Display for PluginState {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            PluginState::Adding => write!(f, "Adding"),
-            PluginState::Ready => write!(f, "Ready"),
-            PluginState::Finished => write!(f, "Finished"),
-            PluginState::Cleaned => write!(f, "Cleaned"),
+            Self::Adding => write!(f, "Adding"),
+            Self::Ready => write!(f, "Ready"),
+            Self::Finished => write!(f, "Finished"),
+            Self::Cleaned => write!(f, "Cleaned"),
         }
     }
 }
 
 impl PluginState {
     /// Returns the next state in the lifecycle, if any.
-    pub fn next(&self) -> Option<PluginState> {
+    pub const fn next(&self) -> Option<Self> {
         match self {
-            PluginState::Adding => Some(PluginState::Ready),
-            PluginState::Ready => Some(PluginState::Finished),
-            PluginState::Finished => Some(PluginState::Cleaned),
-            PluginState::Cleaned => None,
+            Self::Adding => Some(Self::Ready),
+            Self::Ready => Some(Self::Finished),
+            Self::Finished => Some(Self::Cleaned),
+            Self::Cleaned => None,
         }
     }
 
     /// Returns true if this state can transition to the given state.
-    pub fn can_transition_to(&self, target: PluginState) -> bool {
+    pub fn can_transition_to(&self, target: Self) -> bool {
         self.next() == Some(target)
     }
 }

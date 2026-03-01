@@ -1,4 +1,4 @@
-//! Intermediate representation for CrudModel macro parsing.
+//! Intermediate representation for `CrudModel` macro parsing.
 
 use syn::Ident;
 

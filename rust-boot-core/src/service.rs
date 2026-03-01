@@ -27,17 +27,17 @@ impl Default for PaginationParams {
 
 impl PaginationParams {
     /// Creates new pagination parameters.
-    pub fn new(page: u64, per_page: u64) -> Self {
+    pub const fn new(page: u64, per_page: u64) -> Self {
         Self { page, per_page }
     }
 
     /// Calculates the offset for database queries.
-    pub fn offset(&self) -> u64 {
+    pub const fn offset(&self) -> u64 {
         (self.page.saturating_sub(1)) * self.per_page
     }
 
     /// Returns the limit (items per page).
-    pub fn limit(&self) -> u64 {
+    pub const fn limit(&self) -> u64 {
         self.per_page
     }
 }
@@ -59,11 +59,11 @@ pub struct PaginatedResult<T> {
 
 impl<T> PaginatedResult<T> {
     /// Creates a new paginated result.
-    pub fn new(items: Vec<T>, total: u64, params: PaginationParams) -> Self {
+    pub const fn new(items: Vec<T>, total: u64, params: PaginationParams) -> Self {
         let total_pages = if params.per_page == 0 {
             0
         } else {
-            (total + params.per_page - 1) / params.per_page
+            total.div_ceil(params.per_page)
         };
 
         Self {
@@ -76,12 +76,12 @@ impl<T> PaginatedResult<T> {
     }
 
     /// Returns true if there is a next page.
-    pub fn has_next_page(&self) -> bool {
+    pub const fn has_next_page(&self) -> bool {
         self.page < self.total_pages
     }
 
     /// Returns true if there is a previous page.
-    pub fn has_prev_page(&self) -> bool {
+    pub const fn has_prev_page(&self) -> bool {
         self.page > 1
     }
 
@@ -97,18 +97,13 @@ impl<T> PaginatedResult<T> {
 }
 
 /// Sort direction for queries.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum SortDirection {
     /// Ascending order.
+    #[default]
     Asc,
     /// Descending order.
     Desc,
-}
-
-impl Default for SortDirection {
-    fn default() -> Self {
-        Self::Asc
-    }
 }
 
 /// Sort parameters for queries.
@@ -141,7 +136,7 @@ impl SortParams {
 }
 
 /// Filter operations for dynamic queries.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FilterOp {
     /// Equals comparison.
     Eq(String),
@@ -206,7 +201,8 @@ pub trait CrudService: Send + Sync {
     async fn find_by_id(&self, id: Self::Id) -> Result<Option<Self::Entity>>;
 
     /// Finds all entities with pagination.
-    async fn find_all(&self, pagination: PaginationParams) -> Result<PaginatedResult<Self::Entity>>;
+    async fn find_all(&self, pagination: PaginationParams)
+        -> Result<PaginatedResult<Self::Entity>>;
 
     /// Finds entities matching a filter with pagination.
     async fn find_with_filter(
@@ -353,8 +349,8 @@ mod tests {
         let _lte = FilterOp::Lte("10".to_string());
         let _like = FilterOp::Like("%pattern%".to_string());
         let _in_op = FilterOp::In(vec!["a".to_string(), "b".to_string()]);
-        let _is_null = FilterOp::IsNull;
-        let _is_not_null = FilterOp::IsNotNull;
+        let _ = FilterOp::IsNull;
+        let _ = FilterOp::IsNotNull;
     }
 
     #[test]
@@ -535,12 +531,7 @@ mod tests {
             let total = entities.len() as u64;
             let offset = pagination.offset() as usize;
             let limit = pagination.limit() as usize;
-            let items: Vec<_> = entities
-                .iter()
-                .skip(offset)
-                .take(limit)
-                .cloned()
-                .collect();
+            let items: Vec<_> = entities.iter().skip(offset).take(limit).cloned().collect();
             Ok(PaginatedResult::new(items, total, pagination))
         }
     }
@@ -584,7 +575,7 @@ mod tests {
         for i in 0..25 {
             service
                 .create(CreateTestDto {
-                    name: format!("Entity {}", i),
+                    name: format!("Entity {i}"),
                 })
                 .await
                 .unwrap();

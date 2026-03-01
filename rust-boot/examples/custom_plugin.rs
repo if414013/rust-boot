@@ -2,10 +2,10 @@
 //!
 //! This example shows how to build custom plugins for the rust-boot framework.
 //! It demonstrates:
-//! - Implementing the CrudPlugin trait
+//! - Implementing the `CrudPlugin` trait
 //! - Plugin lifecycle hooks (build, ready, finish, cleanup)
 //! - Plugin dependencies
-//! - Using PluginContext to share state between plugins
+//! - Using `PluginContext` to share state between plugins
 //!
 //! To run this example:
 //! ```bash
@@ -27,7 +27,7 @@ fn main() {
     let rt = tokio::runtime::Runtime::new().unwrap();
     rt.block_on(async {
         if let Err(e) = run_example().await {
-            eprintln!("Error: {}", e);
+            eprintln!("Error: {e}");
         }
     });
 }
@@ -87,7 +87,9 @@ async fn run_example() -> Result<(), Box<dyn std::error::Error>> {
     println!("\n5. Logging audit events...\n");
 
     audit_log.log("user.login", "User alice logged in").await;
-    audit_log.log("user.update", "User alice updated profile").await;
+    audit_log
+        .log("user.update", "User alice updated profile")
+        .await;
     audit_log.log("user.logout", "User alice logged out").await;
 
     println!("   Logged 3 audit events");
@@ -120,7 +122,7 @@ async fn run_example() -> Result<(), Box<dyn std::error::Error>> {
 // RequestCounter - A shared counter that tracks request count
 // ============================================================================
 
-/// Shared state for counting requests (stored in PluginContext)
+/// Shared state for counting requests (stored in `PluginContext`)
 pub struct RequestCounter {
     counter: AtomicU64,
     start_time: RwLock<Option<Instant>>,
@@ -163,7 +165,7 @@ impl Default for RequestCounter {
 
 /// Plugin that provides request counting functionality
 pub struct RequestCounterPlugin {
-    /// Shared counter state that will be stored in PluginContext
+    /// Shared counter state that will be stored in `PluginContext`
     counter: Arc<RequestCounter>,
 }
 
@@ -208,10 +210,7 @@ impl CrudPlugin for RequestCounterPlugin {
     async fn finish(&mut self, _ctx: &mut PluginContext) -> rust_boot::core::error::Result<()> {
         let count = self.counter.count();
         let uptime = self.counter.uptime_secs().await.unwrap_or(0.0);
-        println!(
-            "   [RequestCounter] Finishing... Total requests: {}, Uptime: {:.2}s",
-            count, uptime
-        );
+        println!("   [RequestCounter] Finishing... Total requests: {count}, Uptime: {uptime:.2}s");
         Ok(())
     }
 
@@ -233,7 +232,7 @@ pub struct AuditEntry {
     pub details: String,
 }
 
-/// Shared audit log storage (stored in PluginContext)
+/// Shared audit log storage (stored in `PluginContext`)
 pub struct AuditLog {
     entries: RwLock<Vec<AuditEntry>>,
     entry_count: AtomicU64,
@@ -311,7 +310,7 @@ impl CrudPlugin for AuditLoggerPlugin {
 
     async fn finish(&mut self, _ctx: &mut PluginContext) -> rust_boot::core::error::Result<()> {
         let count = self.log.entries().await.len();
-        println!("   [AuditLogger] Finishing... Total entries: {}", count);
+        println!("   [AuditLogger] Finishing... Total entries: {count}");
         Ok(())
     }
 
@@ -332,7 +331,7 @@ pub struct RateLimiterPlugin {
 }
 
 impl RateLimiterPlugin {
-    pub fn new(max_requests_per_minute: u64) -> Self {
+    pub const fn new(max_requests_per_minute: u64) -> Self {
         Self {
             max_requests_per_minute,
             enabled: false,
@@ -340,12 +339,12 @@ impl RateLimiterPlugin {
     }
 
     #[allow(dead_code)]
-    pub fn is_enabled(&self) -> bool {
+    pub const fn is_enabled(&self) -> bool {
         self.enabled
     }
 
     #[allow(dead_code)]
-    pub fn max_requests(&self) -> u64 {
+    pub const fn max_requests(&self) -> u64 {
         self.max_requests_per_minute
     }
 }
@@ -379,10 +378,7 @@ impl CrudPlugin for RateLimiterPlugin {
     }
 
     async fn finish(&mut self, _ctx: &mut PluginContext) -> rust_boot::core::error::Result<()> {
-        println!(
-            "   [RateLimiter] Finishing... Enabled: {}",
-            self.enabled
-        );
+        println!("   [RateLimiter] Finishing... Enabled: {}", self.enabled);
         Ok(())
     }
 

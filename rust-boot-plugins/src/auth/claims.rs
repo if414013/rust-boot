@@ -103,7 +103,7 @@ impl Claims {
     }
 
     /// Marks this as a refresh token.
-    pub fn as_refresh_token(mut self) -> Self {
+    pub const fn as_refresh_token(mut self) -> Self {
         self.refresh = Some(true);
         self
     }

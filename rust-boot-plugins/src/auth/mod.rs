@@ -23,7 +23,7 @@ pub struct AuthPlugin {
 
 impl AuthPlugin {
     /// Creates a new authentication plugin with the given JWT configuration.
-    pub fn new(config: JwtConfig) -> Self {
+    pub const fn new(config: JwtConfig) -> Self {
         Self {
             config,
             jwt_manager: None,

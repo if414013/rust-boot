@@ -1,4 +1,4 @@
-//! SeaORM entity code generation from CrudModelIr.
+//! `SeaORM` entity code generation from `CrudModelIr`.
 
 use proc_macro2::TokenStream;
 use quote::quote;

@@ -17,9 +17,8 @@ pub struct RedisBackend {
 impl RedisBackend {
     /// Creates a new Redis backend connecting to the given URL.
     pub fn new(url: &str, config: CacheConfig) -> Result<Self> {
-        let client = redis::Client::open(url).map_err(|e| {
-            RustBootError::Cache(format!("Failed to connect to Redis: {}", e))
-        })?;
+        let client = redis::Client::open(url)
+            .map_err(|e| RustBootError::Cache(format!("Failed to connect to Redis: {e}")))?;
 
         Ok(Self {
             client,
@@ -28,15 +27,18 @@ impl RedisBackend {
     }
 
     /// Creates a backend from an existing Redis client.
-    pub fn with_client(client: redis::Client, default_ttl: Duration) -> Self {
-        Self { client, default_ttl }
+    pub const fn with_client(client: redis::Client, default_ttl: Duration) -> Self {
+        Self {
+            client,
+            default_ttl,
+        }
     }
 
     async fn get_connection(&self) -> Result<redis::aio::MultiplexedConnection> {
         self.client
             .get_multiplexed_async_connection()
             .await
-            .map_err(|e| RustBootError::Cache(format!("Redis connection error: {}", e)))
+            .map_err(|e| RustBootError::Cache(format!("Redis connection error: {e}")))
     }
 }
 
@@ -44,9 +46,10 @@ impl RedisBackend {
 impl CacheBackend for RedisBackend {
     async fn get(&self, key: &str) -> Result<Option<Vec<u8>>> {
         let mut conn = self.get_connection().await?;
-        let result: Option<Vec<u8>> = conn.get(key).await.map_err(|e| {
-            RustBootError::Cache(format!("Redis GET error: {}", e))
-        })?;
+        let result: Option<Vec<u8>> = conn
+            .get(key)
+            .await
+            .map_err(|e| RustBootError::Cache(format!("Redis GET error: {e}")))?;
         Ok(result)
     }
 
@@ -54,26 +57,29 @@ impl CacheBackend for RedisBackend {
         let mut conn = self.get_connection().await?;
         let ttl_secs = ttl.unwrap_or(self.default_ttl).as_secs();
 
-        let _: () = conn.set_ex(key, value, ttl_secs).await.map_err(|e| {
-            RustBootError::Cache(format!("Redis SET error: {}", e))
-        })?;
+        let _: () = conn
+            .set_ex(key, value, ttl_secs)
+            .await
+            .map_err(|e| RustBootError::Cache(format!("Redis SET error: {e}")))?;
 
         Ok(())
     }
 
     async fn delete(&self, key: &str) -> Result<bool> {
         let mut conn = self.get_connection().await?;
-        let deleted: i64 = conn.del(key).await.map_err(|e| {
-            RustBootError::Cache(format!("Redis DEL error: {}", e))
-        })?;
+        let deleted: i64 = conn
+            .del(key)
+            .await
+            .map_err(|e| RustBootError::Cache(format!("Redis DEL error: {e}")))?;
         Ok(deleted > 0)
     }
 
     async fn exists(&self, key: &str) -> Result<bool> {
         let mut conn = self.get_connection().await?;
-        let exists: bool = conn.exists(key).await.map_err(|e| {
-            RustBootError::Cache(format!("Redis EXISTS error: {}", e))
-        })?;
+        let exists: bool = conn
+            .exists(key)
+            .await
+            .map_err(|e| RustBootError::Cache(format!("Redis EXISTS error: {e}")))?;
         Ok(exists)
     }
 
@@ -82,7 +88,7 @@ impl CacheBackend for RedisBackend {
         let _: () = redis::cmd("FLUSHDB")
             .query_async(&mut conn)
             .await
-            .map_err(|e| RustBootError::Cache(format!("Redis FLUSHDB error: {}", e)))?;
+            .map_err(|e| RustBootError::Cache(format!("Redis FLUSHDB error: {e}")))?;
         Ok(())
     }
 }

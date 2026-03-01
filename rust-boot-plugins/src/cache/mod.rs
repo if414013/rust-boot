@@ -49,13 +49,13 @@ impl CacheConfig {
     }
 
     /// Sets the default TTL for cached entries.
-    pub fn with_ttl(mut self, ttl: Duration) -> Self {
+    pub const fn with_ttl(mut self, ttl: Duration) -> Self {
         self.default_ttl = ttl;
         self
     }
 
     /// Sets the maximum capacity of the cache.
-    pub fn with_max_capacity(mut self, capacity: u64) -> Self {
+    pub const fn with_max_capacity(mut self, capacity: u64) -> Self {
         self.max_capacity = capacity;
         self
     }
@@ -163,7 +163,7 @@ impl CrudPlugin for CachingPlugin {
 
 /// Generates a cache key with the given prefix and ID.
 pub fn generate_cache_key(prefix: &str, id: &str) -> String {
-    format!("{}:{}", prefix, id)
+    format!("{prefix}:{id}")
 }
 
 /// Generates a cache key for an entity using its type name and ID.
@@ -171,7 +171,7 @@ pub fn generate_entity_key<T>(entity_name: &str, id: &T) -> String
 where
     T: std::fmt::Display,
 {
-    format!("entity:{}:{}", entity_name, id)
+    format!("entity:{entity_name}:{id}")
 }
 
 #[cfg(test)]
@@ -251,10 +251,7 @@ mod tests {
 
         assert!(!backend.exists("key1").await.unwrap());
 
-        backend
-            .set("key1", b"value1".to_vec(), None)
-            .await
-            .unwrap();
+        backend.set("key1", b"value1".to_vec(), None).await.unwrap();
         assert!(backend.exists("key1").await.unwrap());
 
         let value = backend.get("key1").await.unwrap();
@@ -292,14 +289,8 @@ mod tests {
         let config = CacheConfig::new("test");
         let backend = MokaBackend::new(config);
 
-        backend
-            .set("key1", b"value1".to_vec(), None)
-            .await
-            .unwrap();
-        backend
-            .set("key2", b"value2".to_vec(), None)
-            .await
-            .unwrap();
+        backend.set("key1", b"value1".to_vec(), None).await.unwrap();
+        backend.set("key2", b"value2".to_vec(), None).await.unwrap();
 
         backend.clear().await.unwrap();
 
@@ -330,14 +321,8 @@ mod tests {
         let config = CacheConfig::new("test");
         let backend = MokaBackend::new(config);
 
-        backend
-            .set("key", b"value1".to_vec(), None)
-            .await
-            .unwrap();
-        backend
-            .set("key", b"value2".to_vec(), None)
-            .await
-            .unwrap();
+        backend.set("key", b"value1".to_vec(), None).await.unwrap();
+        backend.set("key", b"value2".to_vec(), None).await.unwrap();
 
         let value = backend.get("key").await.unwrap();
         assert_eq!(value, Some(b"value2".to_vec()));

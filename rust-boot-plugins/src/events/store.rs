@@ -73,13 +73,14 @@ impl Default for InMemoryEventStore {
 #[async_trait]
 impl EventStore for InMemoryEventStore {
     async fn append(&self, aggregate_id: &str, events: Vec<StoredEvent>) -> Result<()> {
-        let mut store = self.events.write().map_err(|e| {
-            RustBootError::Internal(format!("Failed to acquire write lock: {}", e))
-        })?;
+        let mut store = self
+            .events
+            .write()
+            .map_err(|e| RustBootError::Internal(format!("Failed to acquire write lock: {e}")))?;
 
         let aggregate_events = store.entry(aggregate_id.to_string()).or_default();
 
-        let current_version = aggregate_events.last().map(|e| e.version).unwrap_or(0);
+        let current_version = aggregate_events.last().map_or(0, |e| e.version);
 
         for event in events {
             if event.version != current_version + 1 {
@@ -96,9 +97,10 @@ impl EventStore for InMemoryEventStore {
     }
 
     async fn load(&self, aggregate_id: &str) -> Result<Vec<StoredEvent>> {
-        let store = self.events.read().map_err(|e| {
-            RustBootError::Internal(format!("Failed to acquire read lock: {}", e))
-        })?;
+        let store = self
+            .events
+            .read()
+            .map_err(|e| RustBootError::Internal(format!("Failed to acquire read lock: {e}")))?;
 
         Ok(store.get(aggregate_id).cloned().unwrap_or_default())
     }
@@ -108,9 +110,10 @@ impl EventStore for InMemoryEventStore {
         aggregate_id: &str,
         from_version: u64,
     ) -> Result<Vec<StoredEvent>> {
-        let store = self.events.read().map_err(|e| {
-            RustBootError::Internal(format!("Failed to acquire read lock: {}", e))
-        })?;
+        let store = self
+            .events
+            .read()
+            .map_err(|e| RustBootError::Internal(format!("Failed to acquire read lock: {e}")))?;
 
         Ok(store
             .get(aggregate_id)
@@ -125,9 +128,10 @@ impl EventStore for InMemoryEventStore {
     }
 
     async fn get_latest_version(&self, aggregate_id: &str) -> Result<Option<u64>> {
-        let store = self.events.read().map_err(|e| {
-            RustBootError::Internal(format!("Failed to acquire read lock: {}", e))
-        })?;
+        let store = self
+            .events
+            .read()
+            .map_err(|e| RustBootError::Internal(format!("Failed to acquire read lock: {e}")))?;
 
         Ok(store
             .get(aggregate_id)
@@ -135,9 +139,10 @@ impl EventStore for InMemoryEventStore {
     }
 
     async fn load_all_by_type(&self, aggregate_type: &str) -> Result<Vec<StoredEvent>> {
-        let store = self.events.read().map_err(|e| {
-            RustBootError::Internal(format!("Failed to acquire read lock: {}", e))
-        })?;
+        let store = self
+            .events
+            .read()
+            .map_err(|e| RustBootError::Internal(format!("Failed to acquire read lock: {e}")))?;
 
         let mut result = Vec::new();
         for events in store.values() {
@@ -160,7 +165,7 @@ mod tests {
 
     fn create_test_event(aggregate_id: &str, version: u64) -> StoredEvent {
         StoredEvent {
-            event_id: format!("evt-{}", version),
+            event_id: format!("evt-{version}"),
             aggregate_id: aggregate_id.to_string(),
             aggregate_type: "TestAggregate".to_string(),
             event_type: "TestEvent".to_string(),

@@ -126,16 +126,14 @@ impl PluginRegistry {
 
         if self.plugins.contains_key(&name) {
             return Err(RustBootError::Plugin(format!(
-                "Plugin '{}' is already registered",
-                name
+                "Plugin '{name}' is already registered"
             )));
         }
 
         for dep in &meta.dependencies {
             if !self.plugins.contains_key(dep) {
                 return Err(RustBootError::Plugin(format!(
-                    "Plugin '{}' depends on '{}' which is not registered. Register dependencies first.",
-                    name, dep
+                    "Plugin '{name}' depends on '{dep}' which is not registered. Register dependencies first."
                 )));
             }
         }
@@ -177,7 +175,7 @@ impl PluginRegistry {
     }
 
     /// Returns a reference to the shared plugin context.
-    pub fn context(&self) -> &PluginContext {
+    pub const fn context(&self) -> &PluginContext {
         &self.context
     }
 
@@ -193,13 +191,13 @@ impl PluginRegistry {
 
         for (name, entry) in &self.plugins {
             in_degree.entry(name.clone()).or_insert(0);
-            dependents.entry(name.clone()).or_insert_with(Vec::new);
+            dependents.entry(name.clone()).or_default();
 
             for dep in &entry.plugin.meta().dependencies {
                 *in_degree.entry(name.clone()).or_insert(0) += 1;
                 dependents
                     .entry(dep.clone())
-                    .or_insert_with(Vec::new)
+                    .or_default()
                     .push(name.clone());
             }
         }
@@ -235,8 +233,7 @@ impl PluginRegistry {
                 .cloned()
                 .collect();
             return Err(RustBootError::Plugin(format!(
-                "Circular dependency detected involving plugins: {:?}",
-                remaining
+                "Circular dependency detected involving plugins: {remaining:?}"
             )));
         }
 
@@ -453,10 +450,7 @@ mod tests {
 
         registry.register(TestPlugin::new("database")).unwrap();
         registry
-            .register(TestPlugin::with_deps(
-                "cache",
-                vec!["database".to_string()],
-            ))
+            .register(TestPlugin::with_deps("cache", vec!["database".to_string()]))
             .unwrap();
         registry
             .register(TestPlugin::with_deps("auth", vec!["cache".to_string()]))
