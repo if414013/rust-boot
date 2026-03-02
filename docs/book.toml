@@ -15,5 +15,6 @@ command = "mdbook-mermaid"
 default-theme = "navy"
 preferred-dark-theme = "navy"
 additional-css = ["theme/custom.css"]
+additional-js = ["mermaid.min.js", "mermaid-init.js"]
 git-repository-url = "https://github.com/yourusername/rust-boot"
 edit-url-template = "https://github.com/yourusername/rust-boot/edit/main/docs/{path}"
